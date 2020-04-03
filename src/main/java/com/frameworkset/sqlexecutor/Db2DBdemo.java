@@ -25,6 +25,7 @@ import org.frameworkset.tran.metrics.TaskMetrics;
 import org.frameworkset.tran.task.TaskCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -42,22 +43,15 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @version 1.0
  */
 @Service
-public class Db2DBdemo{
+public class Db2DBdemo implements InitializingBean {
 	@Autowired
 	private BBossStarter bbossStarterDefault;
 	@Autowired
 	@Qualifier("bbossStarterSecond")
 	private BBossStarter bbossStarterSecond;
 	private static Logger logger = LoggerFactory.getLogger(Db2DBdemo.class);
-	public static void main(String args[]){
-		Db2DBdemo dbdemo = new Db2DBdemo();
-//		dbdemo.fullImportData(  dropIndice);
-//		dbdemo.scheduleImportData(dropIndice);
-		dbdemo.scheduleImportData();
-//		dbdemo.scheduleImportData(dropIndice);
-	}
+
 	public Db2DBdemo(){
-		System.out.println();
 	}
 
 	/**
@@ -273,18 +267,14 @@ public class Db2DBdemo{
 		 */
 		DataStream dataStream = importBuilder.builder();
 		dataStream.execute();//执行导入操作
-		while(true) {
-			System.out.println();
-			try {
-				Thread.sleep(1000);
-			}
-			catch (Exception e){
 
-			}
-		}
 
 
 	}
 
 
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		this.scheduleImportData();
+	}
 }
