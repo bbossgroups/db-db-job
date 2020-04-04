@@ -45,6 +45,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 public class Db2DBdemo implements InitializingBean {
 	@Autowired
+	@Qualifier("bbossStarterDefault")
 	private BBossStarter bbossStarterDefault;
 	@Autowired
 	@Qualifier("bbossStarterSecond")
