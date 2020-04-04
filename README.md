@@ -75,6 +75,43 @@ windows: restart.bat
 
 -Xmx1g
 
+# 作业参数配置
+
+在使用[db-elasticsearch-tool](https://github.com/bbossgroups/db-elasticsearch-tool)时，为了避免调试过程中不断打包发布数据同步工具，可以将部分控制参数配置到启动配置文件resources/application.properties中,然后在代码中通过以下方法获取配置的参数：
+
+```ini
+#工具主程序
+mainclass=org.frameworkset.elasticsearch.imp.Dbdemo
+
+# 参数配置
+# 在代码中获取方法：CommonLauncher.getBooleanAttribute("dropIndice",false);//同时指定了默认值false
+dropIndice=false
+```
+
+在代码中获取参数dropIndice方法：
+
+```java
+boolean dropIndice = CommonLauncher.getBooleanAttribute("dropIndice",false);//同时指定了默认值false
+```
+
+另外可以在resources/application.properties配置控制作业执行的一些参数，例如工作线程数，等待队列数，批处理size等等：
+
+```
+queueSize=50
+workThreads=10
+batchSize=20
+```
+
+在作业执行方法中获取并使用上述参数：
+
+```java
+int batchSize = CommonLauncher.getIntProperty("batchSize",10);//同时指定了默认值
+int queueSize = CommonLauncher.getIntProperty("queueSize",50);//同时指定了默认值
+int workThreads = CommonLauncher.getIntProperty("workThreads",10);//同时指定了默认值
+importBuilder.setBatchSize(batchSize);
+importBuilder.setQueue(queueSize);//设置批量导入线程池等待队列长度
+importBuilder.setThreadCount(workThreads);//设置批量导入线程池工作线程数量
+```
    
 
 ## elasticsearch技术交流群:166471282 
