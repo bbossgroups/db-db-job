@@ -1,6 +1,10 @@
-# 数据到数据库同步工具
+# Spring boot数据库到数据库同步工具
 通过本工具可以非常方便地实现多种数据源之间的数据同步功能，数据库与数据库之间的数据同步功能
 Bboss is a good elasticsearch Java rest client. It operates and accesses elasticsearch in a way similar to mybatis.
+
+[基于spring boot数据库到数据库同步案例使用参考文档](https://esdoc.bbossgroups.com/#/usedatatran-in-spring-boot)
+
+
 
 # BBoss Environmental requirements
 
@@ -112,7 +116,7 @@ importBuilder.setBatchSize(batchSize);
 importBuilder.setQueue(queueSize);//设置批量导入线程池等待队列长度
 importBuilder.setThreadCount(workThreads);//设置批量导入线程池工作线程数量
 ```
-   
+
 
 ## elasticsearch技术交流群:166471282 
 
