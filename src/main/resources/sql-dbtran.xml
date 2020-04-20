@@ -12,7 +12,7 @@
     插入数据sql
     -->
     <property name="insertSql">
-        <![CDATA[INSERT INTO batchtest ( name, author, content, title, optime, oper, subtitle, collecttime,ipinfo)
+        <![CDATA[INSERT INTO batchtest1 ( name, author, content, title, optime, oper, subtitle, collecttime,ipinfo)
                 VALUES ( #[name],  ## 来源dbdemo索引中的 operModule字段
                          #[author], ## 通过datarefactor增加的字段
                          #[content], ## 来源dbdemo索引中的 logContent字段
