@@ -43,16 +43,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @version 1.0
  */
 @Service
-public class Db2DBdemo implements InitializingBean {
+public class Db2DBdemoSQL implements InitializingBean {
 	@Autowired
 	@Qualifier("bbossStarterDefault")
 	private BBossStarter bbossStarterDefault;
 	@Autowired
 	@Qualifier("bbossStarterSecond")
 	private BBossStarter bbossStarterSecond;
-	private static Logger logger = LoggerFactory.getLogger(Db2DBdemo.class);
+	private static Logger logger = LoggerFactory.getLogger(Db2DBdemoSQL.class);
 
-	public Db2DBdemo(){
+	public Db2DBdemoSQL(){
 	}
 
 	/**
@@ -77,9 +77,9 @@ public class Db2DBdemo implements InitializingBean {
 		 */
 		importBuilder.setDbName("secondds");
 		importBuilder
-				.setSqlFilepath("sql-dbtran.xml")
-				.setSqlName("demoexportFull")
-
+//				.setSqlFilepath("sql-dbtran.xml")
+//				.setSqlName("demoexportFull")
+				.setSql("select * from batchtest ")
 				.setUseLowcase(false)  //可选项，true 列名称转小写，false列名称不转换小写，默认false，只要在UseJavaName为false的情况下，配置才起作用
 				.setPrintTaskLog(true); //可选项，true 打印任务执行日志（耗时，处理记录数） false 不打印，默认值false
 		importBuilder.setTargetDbName("firstds")
@@ -89,8 +89,21 @@ public class Db2DBdemo implements InitializingBean {
 //				.setTargetDbPassword("123456")
 //				.setTargetValidateSQL("select 1")
 //				.setTargetUsePool(true)//是否使用连接池
-				.setInsertSqlName("insertSql").setBatchSize(10); //可选项,批量导入db的记录数，默认为-1，逐条处理，> 0时批量处理
+//				.setInsertSqlName("insertSql")
 
+
+				.setBatchSize(10); //可选项,批量导入db的记录数，默认为-1，逐条处理，> 0时批量处理
+		String insertSql = "INSERT INTO batchtest1 ( name, author, content, title, optime, oper, subtitle, collecttime,ipinfo) \r\n"+
+		"VALUES ( #[name],  ## 来源dbdemo索引中的 operModule字段 \r\n"+
+				"#[author], ## 通过datarefactor增加的字段 \r\n"+
+				" #[content], ## 来源dbdemo索引中的 logContent字段 \r\n"+
+				"#[title], ## 通过datarefactor增加的字段 \r\n"+
+				"#[optime], ## 来源dbdemo索引中的 logOpertime字段 \r\n"+
+				"#[oper],  ## 来源dbdemo索引中的 logOperuser字段 \r\n"+
+				"#[subtitle], ## 通过datarefactor增加的字段 \r\n"+
+				"#[collecttime], ## 通过datarefactor增加的字段 \r\n"+
+				"#[ipinfo]) ## 通过datarefactor增加的地理位置信息字段";
+		importBuilder.setInsertSql(insertSql);
 		//定时任务配置，
 		importBuilder.setFixedRate(false)//参考jdk timer task文档对fixedRate的说明
 //					 .setScheduleDate(date) //指定任务开始执行时间：日期
@@ -276,6 +289,6 @@ public class Db2DBdemo implements InitializingBean {
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-//		this.scheduleImportData();
+		this.scheduleImportData();
 	}
 }
