@@ -16,6 +16,7 @@ package com.frameworkset.sqlexecutor;
  */
 
 import org.frameworkset.spi.boot.BBossStarter;
+import org.frameworkset.tran.DBConfig;
 import org.frameworkset.tran.DataRefactor;
 import org.frameworkset.tran.DataStream;
 import org.frameworkset.tran.ExportResultHandler;
@@ -43,16 +44,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @version 1.0
  */
 @Service
-public class Db2DBdemoSQL implements InitializingBean {
+public class Db2DBdemoWithStatusConfigDB implements InitializingBean {
 	@Autowired
 	@Qualifier("bbossStarterDefault")
 	private BBossStarter bbossStarterDefault;
 	@Autowired
 	@Qualifier("bbossStarterSecond")
 	private BBossStarter bbossStarterSecond;
-	private static Logger logger = LoggerFactory.getLogger(Db2DBdemoSQL.class);
+	private static Logger logger = LoggerFactory.getLogger(Db2DBdemoWithStatusConfigDB.class);
 
-	public Db2DBdemoSQL(){
+	public Db2DBdemoWithStatusConfigDB(){
 	}
 
 	/**
@@ -77,9 +78,9 @@ public class Db2DBdemoSQL implements InitializingBean {
 		 */
 		importBuilder.setDbName("secondds");
 		importBuilder
-//				.setSqlFilepath("sql-dbtran.xml")
-//				.setSqlName("demoexportFull")
-				.setSql("select * from batchtest ")
+				.setSqlFilepath("sql-dbtran.xml")
+				.setSqlName("demoexport")
+
 				.setUseLowcase(false)  //可选项，true 列名称转小写，false列名称不转换小写，默认false，只要在UseJavaName为false的情况下，配置才起作用
 				.setPrintTaskLog(true); //可选项，true 打印任务执行日志（耗时，处理记录数） false 不打印，默认值false
 		importBuilder.setTargetDbName("firstds")
@@ -89,21 +90,8 @@ public class Db2DBdemoSQL implements InitializingBean {
 //				.setTargetDbPassword("123456")
 //				.setTargetValidateSQL("select 1")
 //				.setTargetUsePool(true)//是否使用连接池
-//				.setInsertSqlName("insertSql")
+				.setInsertSqlName("insertSql").setBatchSize(5000); //可选项,批量导入db的记录数，默认为-1，逐条处理，> 0时批量处理
 
-
-				.setBatchSize(10); //可选项,批量导入db的记录数，默认为-1，逐条处理，> 0时批量处理
-		String insertSql = "INSERT INTO batchtest1 ( name, author, content, title, optime, oper, subtitle, collecttime,ipinfo) \r\n"+
-		"VALUES ( #[name],  ## 来源dbdemo索引中的 operModule字段 \r\n"+
-				"#[author], ## 通过datarefactor增加的字段 \r\n"+
-				" #[content], ## 来源dbdemo索引中的 logContent字段 \r\n"+
-				"#[title], ## 通过datarefactor增加的字段 \r\n"+
-				"#[optime], ## 来源dbdemo索引中的 logOpertime字段 \r\n"+
-				"#[oper],  ## 来源dbdemo索引中的 logOperuser字段 \r\n"+
-				"#[subtitle], ## 通过datarefactor增加的字段 \r\n"+
-				"#[collecttime], ## 通过datarefactor增加的字段 \r\n"+
-				"#[ipinfo]) ## 通过datarefactor增加的地理位置信息字段";
-		importBuilder.setInsertSql(insertSql);
 		//定时任务配置，
 		importBuilder.setFixedRate(false)//参考jdk timer task文档对fixedRate的说明
 //					 .setScheduleDate(date) //指定任务开始执行时间：日期
@@ -146,12 +134,14 @@ public class Db2DBdemoSQL implements InitializingBean {
 //		//设置任务执行拦截器结束，可以添加多个
 		//增量配置开始
 //		importBuilder.setLastValueColumn("log_id");//手动指定数字增量查询字段，默认采用上面设置的sql语句中的增量变量名称作为增量查询字段的名称，指定以后就用指定的字段
-//		importBuilder.setFromFirst(true);//setFromfirst(false)，如果作业停了，作业重启后从上次截止位置开始采集数据，
+		importBuilder.setFromFirst(false);//setFromfirst(false)，如果作业停了，作业重启后从上次截止位置开始采集数据，
 		//setFromfirst(true) 如果作业停了，作业重启后，重新开始采集数据
 //		importBuilder.setLastValueStorePath("logtable_import");//记录上次采集的增量字段值的文件路径，作为下次增量（或者重启后）采集数据的起点，不同的任务这个路径要不一样
-//		importBuilder.setLastValueStoreTableName("logs");//记录上次采集的增量字段值的表，可以不指定，采用默认表名increament_tab
+		importBuilder.setLastValueStoreTableName("logs");//记录上次采集的增量字段值的表，可以不指定，采用默认表名increament_tab
 //		importBuilder.setLastValueType(ImportIncreamentConfig.NUMBER_TYPE);//如果没有指定增量查询字段名称，则需要指定字段类型：ImportIncreamentConfig.NUMBER_TYPE 数字类型
 		// 或者ImportIncreamentConfig.TIMESTAMP_TYPE 日期类型
+		importBuilder.setStatusDbname("secondds");
+		importBuilder.setStatusTableDML(DBConfig.mysql_createStatusTableSQL);
 		//增量配置结束
 
 		//映射和转换配置开始
@@ -249,25 +239,25 @@ public class Db2DBdemoSQL implements InitializingBean {
 		importBuilder.setAsyn(false);//true 异步方式执行，不等待所有导入作业任务结束，方法快速返回；false（默认值） 同步方式执行，等待所有导入作业任务结束，所有作业结束后方法才返回
 
 		importBuilder.setDebugResponse(false);//设置是否将每次处理的reponse打印到日志文件中，默认false
-		importBuilder.setDiscardBulkResponse(false);//设置是否需要批量处理的响应报文，不需要设置为false，true为需要，默认false
+		importBuilder.setDiscardBulkResponse(true);//设置是否需要批量处理的响应报文，不需要设置为false，true为需要，默认false
 
 		importBuilder.setExportResultHandler(new ExportResultHandler<String,String>() {
 			@Override
 			public void success(TaskCommand<String,String> taskCommand, String result) {
 				TaskMetrics taskMetrics = taskCommand.getTaskMetrics();
-				logger.info(taskMetrics.toString());
+//				logger.info(taskMetrics.toString());
 			}
 
 			@Override
 			public void error(TaskCommand<String,String> taskCommand, String result) {
 				TaskMetrics taskMetrics = taskCommand.getTaskMetrics();
-				logger.info(taskMetrics.toString());
+//				logger.info(taskMetrics.toString());
 			}
 
 			@Override
 			public void exception(TaskCommand<String,String> taskCommand, Exception exception) {
 				TaskMetrics taskMetrics = taskCommand.getTaskMetrics();
-				logger.info(taskMetrics.toString());
+//				logger.info(taskMetrics.toString());
 			}
 
 			@Override
@@ -288,6 +278,6 @@ public class Db2DBdemoSQL implements InitializingBean {
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-//		this.scheduleImportData();
+		this.scheduleImportData();
 	}
 }

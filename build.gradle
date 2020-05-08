@@ -137,7 +137,7 @@ configure(allprojects) { project ->
 
         compile(
                 //[group: 'org.elasticsearch.plugin', name: 'jdbc', version: "6.3.2", transitive: true],
-                [group: 'com.bbossgroups', name: 'bboss-spring-boot-starter', version: "${bboss_version}", transitive: true],
+                [group: 'com.bbossgroups', name: 'bboss-spring-boot-starter', version: "${bboss_starter_version}", transitive: true],
 
         )
     //            {
