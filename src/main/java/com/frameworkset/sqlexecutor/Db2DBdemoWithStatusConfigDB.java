@@ -192,7 +192,7 @@ public class Db2DBdemoWithStatusConfigDB implements InitializingBean {
 				}
 				else{
 					context.markRecoredUpdate();//存在，标记为修改
-					context.addFieldValue("content","new ocntnent");
+					context.addFieldValue("content","new ocntnent");//模拟调整修改content字段内容
 				}
 //				context.markRecoredDelete(); //亦可以根据条件，将记录标记为删除
 				context.addFieldValue("author","duoduo");
