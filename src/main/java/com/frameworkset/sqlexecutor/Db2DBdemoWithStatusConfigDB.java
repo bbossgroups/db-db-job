@@ -15,6 +15,7 @@ package com.frameworkset.sqlexecutor;
  * limitations under the License.
  */
 
+import com.frameworkset.common.poolman.SQLExecutor;
 import org.frameworkset.spi.boot.BBossStarter;
 import org.frameworkset.tran.DBConfig;
 import org.frameworkset.tran.DataRefactor;
@@ -76,21 +77,24 @@ public class Db2DBdemoWithStatusConfigDB implements InitializingBean {
 		/**
 		 * 源db相关配置
 		 */
-		importBuilder.setDbName("secondds");
+		importBuilder.setDbName("secondds");//指定源数据库，在application.properties文件中配置
 		importBuilder
 				.setSqlFilepath("sql-dbtran.xml")
-				.setSqlName("demoexport")
+				.setSqlName("demoexport")//指定查询源库的sql语句，在配置文件中配置：sql-dbtran.xml
 
 				.setUseLowcase(false)  //可选项，true 列名称转小写，false列名称不转换小写，默认false，只要在UseJavaName为false的情况下，配置才起作用
 				.setPrintTaskLog(true); //可选项，true 打印任务执行日志（耗时，处理记录数） false 不打印，默认值false
-		importBuilder.setTargetDbName("firstds")
+		importBuilder.setTargetDbName("firstds")//指定目标数据库，在application.properties文件中配置
 //				.setTargetDbDriver("com.mysql.jdbc.Driver") //数据库驱动程序，必须导入相关数据库的驱动jar包
 //				.setTargetDbUrl("jdbc:mysql://localhost:3306/bboss?useCursorFetch=true") //通过useCursorFetch=true启用mysql的游标fetch机制，否则会有严重的性能隐患，useCursorFetch必须和jdbcFetchSize参数配合使用，否则不会生效
 //				.setTargetDbUser("root")
 //				.setTargetDbPassword("123456")
 //				.setTargetValidateSQL("select 1")
 //				.setTargetUsePool(true)//是否使用连接池
-				.setInsertSqlName("insertSql").setBatchSize(5000); //可选项,批量导入db的记录数，默认为-1，逐条处理，> 0时批量处理
+				.setInsertSqlName("insertSql")//指定新增的sql语句名称，在配置文件中配置：sql-dbtran.xml
+				.setUpdateSqlName("updateSql")//指定修改的sql语句名称，在配置文件中配置：sql-dbtran.xml
+				.setDeleteSqlName("deleteSql")//指定删除的sql语句名称，在配置文件中配置：sql-dbtran.xml
+				.setBatchSize(5000); //可选项,批量导入db的记录数，默认为-1，逐条处理，> 0时批量处理
 
 		//定时任务配置，
 		importBuilder.setFixedRate(false)//参考jdk timer task文档对fixedRate的说明
@@ -134,7 +138,7 @@ public class Db2DBdemoWithStatusConfigDB implements InitializingBean {
 //		//设置任务执行拦截器结束，可以添加多个
 		//增量配置开始
 //		importBuilder.setLastValueColumn("log_id");//手动指定数字增量查询字段，默认采用上面设置的sql语句中的增量变量名称作为增量查询字段的名称，指定以后就用指定的字段
-		importBuilder.setFromFirst(false);//setFromfirst(false)，如果作业停了，作业重启后从上次截止位置开始采集数据，
+		importBuilder.setFromFirst(true);//setFromfirst(false)，如果作业停了，作业重启后从上次截止位置开始采集数据，
 		//setFromfirst(true) 如果作业停了，作业重启后，重新开始采集数据
 //		importBuilder.setLastValueStorePath("logtable_import");//记录上次采集的增量字段值的文件路径，作为下次增量（或者重启后）采集数据的起点，不同的任务这个路径要不一样
 		importBuilder.setLastValueStoreTableName("logs");//记录上次采集的增量字段值的表，可以不指定，采用默认表名increament_tab
@@ -181,8 +185,16 @@ public class Db2DBdemoWithStatusConfigDB implements InitializingBean {
 //					context.setDrop(true);
 //					return;
 //				}
-
-
+				String name =  context.getStringValue("name");
+				Integer num = SQLExecutor.queryObjectWithDBName(Integer.class,"firstds","select count(*) from batchtest1 where name = ?",name);//判断目标数据库表中是否已经存在name对应的记录
+				if(num == null || num == 0){
+					context.markRecoredInsert();//不存在，标记为新增
+				}
+				else{
+					context.markRecoredUpdate();//存在，标记为修改
+					context.addFieldValue("content","new ocntnent");
+				}
+//				context.markRecoredDelete(); //亦可以根据条件，将记录标记为删除
 				context.addFieldValue("author","duoduo");
 				context.addFieldValue("title","解放");
 				context.addFieldValue("subtitle","小康");

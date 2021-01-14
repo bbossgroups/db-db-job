@@ -24,5 +24,23 @@
                          #[ipinfo]) ## 通过datarefactor增加的地理位置信息字段
 ]]>
     </property>
+    <!--
+   插入数据sql
+   -->
+    <property name="updateSql">
+        <![CDATA[update batchtest1 set author=#[author],
+        content=#[content], title=#[title], optime=#[optime], oper=#[oper], subtitle=#[subtitle], collecttime=#[collecttime],ipinfo=#[ipinfo]
+                where name=#[name]
+
+]]>
+    </property>
+
+    <!--
+   插入数据sql
+   -->
+    <property name="deleteSql">
+        <![CDATA[delete from batchtest1 where name=#[name]
+]]>
+    </property>
 
 </properties>
