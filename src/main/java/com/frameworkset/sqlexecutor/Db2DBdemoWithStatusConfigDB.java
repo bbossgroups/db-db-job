@@ -15,7 +15,6 @@ package com.frameworkset.sqlexecutor;
  * limitations under the License.
  */
 
-import com.frameworkset.common.poolman.SQLExecutor;
 import org.frameworkset.spi.boot.BBossStarter;
 import org.frameworkset.tran.DBConfig;
 import org.frameworkset.tran.DataRefactor;
@@ -94,6 +93,14 @@ public class Db2DBdemoWithStatusConfigDB implements InitializingBean {
 				.setInsertSqlName("insertSql")//指定新增的sql语句名称，在配置文件中配置：sql-dbtran.xml
 				.setUpdateSqlName("updateSql")//指定修改的sql语句名称，在配置文件中配置：sql-dbtran.xml
 				.setDeleteSqlName("deleteSql")//指定删除的sql语句名称，在配置文件中配置：sql-dbtran.xml
+				/**
+				 * 是否在批处理时，将insert、update、delete记录分组排序
+				 * true：分组排序，先执行insert、在执行update、最后执行delete操作
+				 * false：按照原始顺序执行db操作，默认值false
+				 * @param optimize
+				 * @return
+				 */
+				.setOptimize(true)
 				.setBatchSize(5000); //可选项,批量导入db的记录数，默认为-1，逐条处理，> 0时批量处理
 
 		//定时任务配置，
@@ -185,6 +192,17 @@ public class Db2DBdemoWithStatusConfigDB implements InitializingBean {
 //					context.setDrop(true);
 //					return;
 //				}
+				if(s.incrementAndGet() % 2 == 1) {
+					context.markRecoredInsert();
+				}
+				else if(s.incrementAndGet() % 2 == 0){
+					context.markRecoredUpdate();
+				}
+				else{
+					context.markRecoredDelete();
+				}
+				//System.out.println(SimpleStringUtil.object2json(SQLExecutor.queryListWithDBName(Map.class,"secondds","select * from batchtest")));
+				/**
 				String name =  context.getStringValue("name");
 				Integer num = SQLExecutor.queryObjectWithDBName(Integer.class,"firstds","select count(*) from batchtest1 where name = ?",name);//判断目标数据库表中是否已经存在name对应的记录
 				if(num == null || num == 0){
@@ -195,6 +213,8 @@ public class Db2DBdemoWithStatusConfigDB implements InitializingBean {
 					context.addFieldValue("content","new ocntnent");//模拟调整修改content字段内容
 				}
 //				context.markRecoredDelete(); //亦可以根据条件，将记录标记为删除
+				 */
+
 				context.addFieldValue("author","duoduo");
 				context.addFieldValue("title","解放");
 				context.addFieldValue("subtitle","小康");

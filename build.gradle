@@ -145,7 +145,7 @@ configure(allprojects) { project ->
     //        exclude group: 'org.slf4j', module: 'slf4j-log4j12'
     //    }
         testCompile(
-                [group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.2.5.RELEASE', transitive: true],
+                [group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: "${spring_boot_version}", transitive: true],
 
         )
                 {
@@ -158,7 +158,7 @@ configure(allprojects) { project ->
         )
         compile(
 
-                [group: 'org.springframework.boot', name: 'spring-boot-autoconfigure', version: '2.2.5.RELEASE', transitive: true],
+                [group: 'org.springframework.boot', name: 'spring-boot-autoconfigure', version: "${spring_boot_version}", transitive: true],
 
         ){
             exclude group: 'ch.qos.logback', module: 'logback-classic'
@@ -166,7 +166,7 @@ configure(allprojects) { project ->
 
         compile(
 
-                [group: 'org.springframework.boot', name: 'spring-boot-configuration-processor', version: '2.2.5.RELEASE', transitive: true]
+                [group: 'org.springframework.boot', name: 'spring-boot-configuration-processor', version: "${spring_boot_version}", transitive: true]
 
         ){
             exclude group: 'ch.qos.logback', module: 'logback-classic'
