@@ -275,6 +275,6 @@ public class Db2DBdemo implements InitializingBean {
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-//		this.scheduleImportData();
+		this.scheduleImportData();
 	}
 }

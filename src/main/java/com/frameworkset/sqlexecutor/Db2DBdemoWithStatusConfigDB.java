@@ -311,6 +311,6 @@ public class Db2DBdemoWithStatusConfigDB implements InitializingBean {
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		this.scheduleImportData();
+//		this.scheduleImportData();
 	}
 }
