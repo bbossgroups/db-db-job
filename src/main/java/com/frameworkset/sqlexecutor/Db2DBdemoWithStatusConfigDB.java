@@ -15,8 +15,6 @@ package com.frameworkset.sqlexecutor;
  * limitations under the License.
  */
 
-import com.frameworkset.common.poolman.SQLExecutor;
-import com.frameworkset.util.SimpleStringUtil;
 import org.frameworkset.spi.boot.BBossStarter;
 import org.frameworkset.tran.DBConfig;
 import org.frameworkset.tran.DataRefactor;
@@ -34,7 +32,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -195,16 +192,17 @@ public class Db2DBdemoWithStatusConfigDB implements InitializingBean {
 //					context.setDrop(true);
 //					return;
 //				}
+
 				if(s.incrementAndGet() % 2 == 1) {
 					context.markRecoredInsert();
 				}
 				else if(s.incrementAndGet() % 2 == 0){
 					context.markRecoredUpdate();
 				}
-				else{
+				else if(s.incrementAndGet()  == 1000){
 					context.markRecoredDelete();
 				}
-				System.out.println(SimpleStringUtil.object2json(SQLExecutor.queryListWithDBName(Map.class,"secondds","select * from batchtest")));
+//				System.out.println(SimpleStringUtil.object2json(SQLExecutor.queryListWithDBName(Map.class,"secondds","select * from batchtest")));
 				/**
 				String name =  context.getStringValue("name");
 				Integer num = SQLExecutor.queryObjectWithDBName(Integer.class,"firstds","select count(*) from batchtest1 where name = ?",name);//判断目标数据库表中是否已经存在name对应的记录
