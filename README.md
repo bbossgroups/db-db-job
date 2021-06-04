@@ -29,11 +29,7 @@ mysql,maridb，postgress,oracle ,sqlserver,db2等
 
 # 构建部署
 ## 准备工作
-需要通过gradle构建发布版本，因此通过以下链接下面gradle：
 
-https://gradle.org/next-steps/?version=4.10.2&format=all
-
-下载gradle后解压，将gradle bin目录添加到path环境变量，将gradle安装目录设置为GRADLE_HOME环境变量
 
 gradle安装配置参考文档：
 
