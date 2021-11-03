@@ -192,8 +192,21 @@ public class Db2DBdemoSQL implements InitializingBean {
 //					context.setDrop(true);
 //					return;
 //				}
-
-
+				/**
+				TranMeta tranMeta = context.getMetaData();
+				int columnSize = tranMeta.getColumnCount();
+				for(int i = 0; i < columnSize; i ++){
+					int sqlType = tranMeta.getColumnTypeByIndex(i);//jdbc sql type
+					if(sqlType ==  Types.DATE || sqlType ==  Types.TIMESTAMP || sqlType ==  OracleTypes.TIMESTAMPLTZ
+							|| sqlType ==  OracleTypes.TIMESTAMPNS
+							|| sqlType ==  OracleTypes.TIMESTAMPTZ){
+						String colName = tranMeta.getColumnLabelByIndex(i);
+						Object value = context.getValue(colName);
+						//进行处理
+						Object newValue == xxxx;
+						context.addFieldValue(colName,newValue);
+					}
+				}*/
 				context.addFieldValue("author","duoduo");
 				context.addFieldValue("title","解放");
 				context.addFieldValue("subtitle","小康");
