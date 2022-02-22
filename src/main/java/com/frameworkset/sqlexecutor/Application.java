@@ -19,7 +19,7 @@ public class Application {
 
     private Logger logger = LoggerFactory.getLogger(Application.class);
     public Application(){
-        System.out.println("aa");
+//        System.out.println("aa");
 //        db2DBdemo.scheduleImportData();
     }
     public static void main(String[] args) {
