@@ -15,13 +15,17 @@ package com.frameworkset.sqlexecutor;
  * limitations under the License.
  */
 
+import com.frameworkset.common.poolman.BatchHandler;
+import com.frameworkset.common.poolman.SQLExecutor;
 import org.frameworkset.spi.boot.BBossStarter;
 import org.frameworkset.tran.DataRefactor;
 import org.frameworkset.tran.DataStream;
 import org.frameworkset.tran.ExportResultHandler;
+import org.frameworkset.tran.config.ImportBuilder;
 import org.frameworkset.tran.context.Context;
-import org.frameworkset.tran.db.input.db.DB2DBExportBuilder;
 import org.frameworkset.tran.metrics.TaskMetrics;
+import org.frameworkset.tran.plugin.db.input.DBInputConfig;
+import org.frameworkset.tran.plugin.db.output.DBOutputConfig;
 import org.frameworkset.tran.task.TaskCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +34,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -59,7 +65,7 @@ public class Db2DBdemo implements InitializingBean {
 	 * elasticsearch地址和数据库地址都从外部配置文件application.properties中获取，加载数据源配置和es配置
 	 */
 	public void scheduleImportData(){
-		DB2DBExportBuilder importBuilder = DB2DBExportBuilder.newInstance();
+		ImportBuilder importBuilder = ImportBuilder.newInstance();
 
 
 
@@ -75,22 +81,28 @@ public class Db2DBdemo implements InitializingBean {
 		/**
 		 * 源db相关配置
 		 */
-		importBuilder.setDbName("secondds");
-		importBuilder
+		DBInputConfig dbInputConfig = new DBInputConfig();
+		dbInputConfig.setDbName("secondds");
+		dbInputConfig
 				.setSqlFilepath("sql-dbtran.xml")
-				.setSqlName("demoexportFull")
+				.setSqlName("demoexportFull");
+		importBuilder.setInputConfig(dbInputConfig);
 
-				.setUseLowcase(false)  //可选项，true 列名称转小写，false列名称不转换小写，默认false，只要在UseJavaName为false的情况下，配置才起作用
-				.setPrintTaskLog(true); //可选项，true 打印任务执行日志（耗时，处理记录数） false 不打印，默认值false
-		importBuilder.setTargetDbName("firstds")
-//				.setTargetDbDriver("com.mysql.cj.jdbc.Driver") //数据库驱动程序，必须导入相关数据库的驱动jar包
-//				.setTargetDbUrl("jdbc:mysql://localhost:3306/bboss?useCursorFetch=true") //通过useCursorFetch=true启用mysql的游标fetch机制，否则会有严重的性能隐患，useCursorFetch必须和jdbcFetchSize参数配合使用，否则不会生效
-//				.setTargetDbUser("root")
-//				.setTargetDbPassword("123456")
-//				.setTargetValidateSQL("select 1")
-//				.setTargetUsePool(true)//是否使用连接池
-				.setInsertSqlName("insertSql").setBatchSize(10); //可选项,批量导入db的记录数，默认为-1，逐条处理，> 0时批量处理
+		DBOutputConfig dbOutputConfig = new DBOutputConfig();
+		dbOutputConfig.setDbName("firstds")
+				.setSqlFilepath("sql-dbtran.xml")
+//				.setDbDriver("com.mysql.cj.jdbc.Driver") //数据库驱动程序，必须导入相关数据库的驱动jar包
+//				.setDbUrl("jdbc:mysql://localhost:3306/bboss?useCursorFetch=true") //通过useCursorFetch=true启用mysql的游标fetch机制，否则会有严重的性能隐患，useCursorFetch必须和jdbcFetchSize参数配合使用，否则不会生效
+//				.setDbUser("root")
+//				.setDbPassword("123456")
+//				.setValidateSQL("select 1")
+//				.setUsePool(true)//是否使用连接池
+				.setInsertSqlName("insertSql");
+		importBuilder.setOutputConfig(dbOutputConfig);
 
+		importBuilder.setUseLowcase(false)  //可选项，true 列名称转小写，false列名称不转换小写，默认false，只要在UseJavaName为false的情况下，配置才起作用
+				.setPrintTaskLog(true) //可选项，true 打印任务执行日志（耗时，处理记录数） false 不打印，默认值false
+				.setBatchSize(10); //可选项,批量导入db的记录数，默认为-1，逐条处理，> 0时批量处理
 		//定时任务配置，
 		importBuilder.setFixedRate(false)//参考jdk timer task文档对fixedRate的说明
 //					 .setScheduleDate(date) //指定任务开始执行时间：日期
@@ -236,8 +248,6 @@ public class Db2DBdemo implements InitializingBean {
 		importBuilder.setContinueOnError(true);//任务出现异常，是否继续执行作业：true（默认值）继续执行 false 中断作业执行
 		importBuilder.setAsyn(false);//true 异步方式执行，不等待所有导入作业任务结束，方法快速返回；false（默认值） 同步方式执行，等待所有导入作业任务结束，所有作业结束后方法才返回
 
-		importBuilder.setDebugResponse(false);//设置是否将每次处理的reponse打印到日志文件中，默认false
-		importBuilder.setDiscardBulkResponse(false);//设置是否需要批量处理的响应报文，不需要设置为false，true为需要，默认false
 
 		importBuilder.setExportResultHandler(new ExportResultHandler<String,String>() {
 			@Override
@@ -274,8 +284,53 @@ public class Db2DBdemo implements InitializingBean {
 	}
 
 
+	/**
+	 * 准备初始化数据
+	 * @throws SQLException
+	 */
+	private void initData() throws SQLException {
+		String dbname = "secondds";
+		List<Map> datas = new ArrayList<>();
+
+		for(int i = 0; i < 1000; i ++) {
+			Map record = new LinkedHashMap();
+
+			record.put("id",i);
+			record.put("name","name_"+i);
+			record.put("author","author"+i);
+			record.put("content","content"+i);
+			record.put("title","title"+i);
+			record.put("optime",new Date());
+			record.put("oper","oper"+i);
+			record.put("subtitle","subtitle"+i);
+			record.put("collecttime",new Date());
+			record.put("ipinfo","ipinfo"+i);
+			datas.add(record);
+
+		}
+		SQLExecutor.deleteWithDBName(dbname,"delete from batchtest");
+//		https://www.iteye.com/blog/yin-bp-2374285
+		SQLExecutor.executeBatch(dbname, "INSERT INTO batchtest (id, name, author, content, title, optime, oper, subtitle, collecttime, ipinfo)" +
+				" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",  datas,1000, new BatchHandler<Map>() {
+			@Override
+			public void handler(PreparedStatement stmt, Map record, int i) throws SQLException {
+				stmt.setInt(1,(int)record.get("id"));
+				stmt.setString(2,(String)record.get("name"));
+				stmt.setString(3,(String)record.get("author"));
+				stmt.setString(4,(String)record.get("content"));
+				stmt.setString(5,(String)record.get("title"));
+				stmt.setDate(6,new java.sql.Date(((Date)record.get("optime")).getTime()));
+				stmt.setString(7,(String)record.get("oper"));
+				stmt.setString(8,(String)record.get("subtitle"));
+				stmt.setDate(9,new java.sql.Date(((Date)record.get("collecttime")).getTime()));
+				stmt.setString(10,(String)record.get("ipinfo"));
+			}
+		});
+	}
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		this.scheduleImportData();
+		//运行作业入口，如果需要则去掉注释运行本案例，运行前把其他案例注释掉，否则影响运行结果
+//		initData();
+//		this.scheduleImportData();
 	}
 }
