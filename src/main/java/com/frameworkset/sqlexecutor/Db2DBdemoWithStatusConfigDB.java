@@ -131,7 +131,7 @@ public class Db2DBdemoWithStatusConfigDB implements InitializingBean {
 //			}
 //
 //			@Override
-//			public void throwException(TaskContext taskContext, Exception e) {
+//			public void throwException(TaskContext taskContext, Throwable e) {
 //				System.out.println("throwException");
 //			}
 //		}).addCallInterceptor(new CallInterceptor() {
@@ -146,7 +146,7 @@ public class Db2DBdemoWithStatusConfigDB implements InitializingBean {
 //			}
 //
 //			@Override
-//			public void throwException(TaskContext taskContext, Exception e) {
+//			public void throwException(TaskContext taskContext, Throwable e) {
 //				System.out.println("throwException 1");
 //			}
 //		});
@@ -295,7 +295,7 @@ public class Db2DBdemoWithStatusConfigDB implements InitializingBean {
 			}
 
 			@Override
-			public void exception(TaskCommand<String,String> taskCommand, Exception exception) {
+			public void exception(TaskCommand<String,String> taskCommand, Throwable exception) {
 				TaskMetrics taskMetrics = taskCommand.getTaskMetrics();
 //				logger.info(taskMetrics.toString());
 			}
