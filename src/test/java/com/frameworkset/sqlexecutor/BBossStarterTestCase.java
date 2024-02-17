@@ -25,6 +25,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -43,7 +44,10 @@ import java.util.Map;
 
 public class BBossStarterTestCase {
 	@Autowired
+
+    @Qualifier("bbossStarterDefault")
 	private BBossStarter bbossStarterDefault;
+
 	private static Logger logger = LoggerFactory.getLogger(BBossStarterTestCase.class);
     @Test
     public void testMultiBBossESStarterDefault() throws Exception {
@@ -57,7 +61,6 @@ public class BBossStarterTestCase {
 
 	@Test
 	public void testFirstQuery() throws Exception {
-
 		List<Map> datas = SQLExecutor.queryListWithDBName(Map.class,"default","select * from user");
 		logger.info(SimpleStringUtil.object2json(datas));
 	}

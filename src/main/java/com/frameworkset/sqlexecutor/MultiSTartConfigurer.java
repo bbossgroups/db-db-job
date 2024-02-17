@@ -38,6 +38,14 @@ public class MultiSTartConfigurer {
 
 	}
 
+    @Bean(name="bbossStarter",initMethod = "start")
+    @ConfigurationProperties("spring.bboss")
+
+    public BBossStarter bbossStarter(){
+        return new BBossStarter();
+
+    }
+
 	@Bean(name="bbossStarterSecond",initMethod = "start")
 	@ConfigurationProperties("spring.bboss.second")
 	public BBossStarter bbossStarterSecond(){
