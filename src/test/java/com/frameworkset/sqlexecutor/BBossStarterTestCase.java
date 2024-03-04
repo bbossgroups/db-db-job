@@ -48,6 +48,11 @@ public class BBossStarterTestCase {
     @Qualifier("bbossStarterDefault")
 	private BBossStarter bbossStarterDefault;
 
+//    @Autowired
+//
+//    @Qualifier("bbossStarter")
+//    private BBossStarter bbossStarter;
+
 	private static Logger logger = LoggerFactory.getLogger(BBossStarterTestCase.class);
     @Test
     public void testMultiBBossESStarterDefault() throws Exception {
