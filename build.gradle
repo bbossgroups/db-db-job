@@ -127,10 +127,10 @@ configure(allprojects) { project ->
     dependencies {
         testImplementation 'junit:junit:4.13.1'
         //mysql 8.0依赖
-        //api group: 'mysql', name: 'mysql-connector-java', version: '8.0.16'
+        //api group: 'mysql', name: 'mysql-connector-java', version: '8.0.33'
         //mysql 5.x依赖
         api(
-                [group: 'mysql', name: 'mysql-connector-java', version: '8.0.28', transitive: false],
+                [group: 'mysql', name: 'mysql-connector-java', version: '8.0.33', transitive: false],
     //            [group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.2', transitive: true],
     //            [group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.17.2', transitive: true],
     //            [group: 'org.apache.logging.log4j', name: 'log4j-api', version: "2.17.2", transitive: true],
