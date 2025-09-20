@@ -28,8 +28,8 @@ configure(allprojects) { project ->
     }
 
     tasks.withType(Javadoc) {
-        sourceCompatibility = JAVADOC_SOURCE_LEVEL
-        targetCompatibility = JAVADOC_COMPILER_LEVEL
+//        
+//        
         options.encoding = 'UTF-8'
         // disable the crazy super-strict doclint tool in Java 8
         // noinspection SpellCheckingInspection
@@ -38,7 +38,7 @@ configure(allprojects) { project ->
         }
     }
 
-    task sourcesJar(type: Jar) {
+    tasks.register('sourcesJar', Jar) {
         archiveClassifier = "sources"
         from sourceSets.main.allJava
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
@@ -46,7 +46,8 @@ configure(allprojects) { project ->
     processResources {
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
     }
-    task javaDocJar(type: Jar, dependsOn: javadoc) {
+    tasks.register('javaDocJar', Jar) {
+        dependsOn javadoc
         archiveClassifier = "javadoc"
         from javadoc.destinationDir
     }
@@ -189,32 +190,49 @@ configure(allprojects) { project ->
 
 
     }
-    task copyJarFiles(type: Sync,dependsOn:'jar'){
-        from configurations.api{
-            canBeResolved=true
+    // 创建可解析的配置
+    configurations {
+        apiResolvable {
+            canBeResolved = true
+            extendsFrom api
+        }
+        compileOnlyResolvable {
+            canBeResolved = true
+            extendsFrom compileOnly
+        }
+
+        runtimeOnlyResolvable {
+            canBeResolved = true
+            extendsFrom runtimeOnly
+        }
+    }
+    tasks.register('copyJarFiles', Sync) {
+        dependsOn 'jar'
+        from configurations.apiResolvable {
         }
         from jar.outputs
-        exclude { details -> details.file.name.startsWith('bboss-rt')  }
+        exclude { details -> details.file.name.startsWith('bboss-rt') }
         into 'build/dist/lib'
 
     }
 
-    task copyRTJarFiles(type: Copy,dependsOn:'copyJarFiles'){
+    tasks.register('copyRTJarFiles', Copy) {
+        dependsOn 'copyJarFiles'
 
-        from configurations.api{
-            canBeResolved=true
+        from configurations.apiResolvable {
         }
-        include { details -> details.file.name.startsWith('bboss-rt')  }
+        include { details -> details.file.name.startsWith('bboss-rt') }
         into 'build/dist'
-        rename ("bboss-rt-${bboss_version}.jar", "${project.name}-${bboss_version}.jar")
+        rename("bboss-rt-${bboss_version}.jar", "${project.name}-${bboss_version}.jar")
     }
-    task copyToolFiles(type: Copy ,dependsOn:'copyRTJarFiles')  {
+    tasks.register('copyToolFiles', Copy) {
+        dependsOn 'copyRTJarFiles'
 
-        from ('runfiles')
+        from('runfiles')
                 {
                     expand(
-                            bboss_version:"${bboss_version}",
-                            project:"${project.name}"
+                            bboss_version: "${bboss_version}",
+                            project: "${project.name}"
                     )
 
                 }
@@ -222,15 +240,14 @@ configure(allprojects) { project ->
         into 'build/dist/'
 
 
-
     }
-    task copyResourcesfiles(type: Sync )  {
+    tasks.register('copyResourcesfiles', Sync) {
         from fileTree(dir: 'src/main/resources')
         filteringCharset = 'UTF-8'
         into 'build/dist/resources'
     }
-
-    task releaseVersion(type: Zip,dependsOn:['copyToolFiles','copyResourcesfiles']) {
+    tasks.register('releaseVersion',Zip) {
+        dependsOn 'copyToolFiles','copyResourcesfiles'
 
         //appendix = 'wrapper'
         archiveClassifier = 'released'
