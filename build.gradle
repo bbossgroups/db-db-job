@@ -176,7 +176,7 @@ configure(allprojects) { project ->
         }
 
         api(
-                [group: 'com.bbossgroups.plugins', name: 'bboss-datatran-jdbc', version: "${bboss_es_version}", transitive: true],
+                [group: 'com.bbossgroups.plugins', name: 'bboss-datatran-jdbc', version: bboss_es_version, transitive: true],
                 [group: 'com.bbossgroups', name: 'bboss-schedule', version: "${bboss_version}", transitive: true],
         )
     //		api 'org.apache-extras.beanshell:bsh:2.0b6'
