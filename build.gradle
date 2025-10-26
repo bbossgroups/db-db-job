@@ -180,7 +180,7 @@ configure(allprojects) { project ->
                 [group: 'com.bbossgroups', name: 'bboss-schedule', version: "${bboss_version}", transitive: true],
         )
     //		api 'org.apache-extras.beanshell:bsh:2.0b6'
-        api 'org.xerial:sqlite-jdbc:3.45.1.0'
+        api 'org.xerial:sqlite-jdbc:3.50.3.0'
 
         api (
                 [group: 'com.bbossgroups', name: 'bboss-bootstrap-rt', version: "${bboss_version}", transitive: true],
